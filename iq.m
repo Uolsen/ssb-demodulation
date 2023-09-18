@@ -14,10 +14,12 @@ sinusoid1 = sin(2 * pi * frequency * t);
 phase_shift = pi / 2;
 sinusoid2 = sin(2 * pi * frequency * t - phase_shift);
 
-left_channel = transpose(y(:, 2) * 50);
+left_channel = transpose(y(:, 2) * 40);
 left_channel_truncated = left_channel(1:length(sinusoid1));
-right_channel = transpose(y(:, 1) * 50);
+right_channel = transpose(y(:, 1) * 40);
 right_channel_truncated = right_channel(1:length(sinusoid2));
+i = left_channel_truncated;
+q = right_channel_truncated;
 disp(fs) %sampling rate
 %disp(left_channel)
 
@@ -37,7 +39,7 @@ disp("demod");
 % show signal in plot
 plot(t, lsb, 'b');
 hold on;
-plot(t, usb, 'r');
+%plot(t, usb, 'r');
 xlabel('Time');
 ylabel('Amplitude');
 title('Sinus Wave');
@@ -46,6 +48,30 @@ hold off;
 
 player = audioplayer(lsb, fs, 16);
 play(player);
+
+%offset = 1;  % Adjust the offset as needed
+%scaling_factor = intmax('int32');  % Adjust the scaling factor as needed
+%integer_signal = round((scaling_factor - offset) * (lsb - min(lsb)) / (max(lsb) - min(lsb)) + offset);
+
+%ssb_signal = integer_signal;
+signal = i + q*1i;
+
+% Apply the FFT 
+fft_result = fft(lsb);  
+
+% Shift the FFT result to center the frequency spectrum 
+fft_result_shifted = fftshift(lsb);  
+
+% Generate the frequency axis for plotting 
+fs = fs;  % Sample rate (adjust to match your signal) 
+N = length(lsb);  % Length of signal array 
+f = (-fs/2:fs/N:fs/2 - fs/N)';  % Frequency axis (negative to positive)  
+
+% Plot the magnitude spectrum 
+plot(f, abs(fft_result)); 
+title('Magnitude Spectrum'); 
+xlabel('Frequency (Hz)'); 
+ylabel('Magnitude'); 
 
 pause(time);
 
